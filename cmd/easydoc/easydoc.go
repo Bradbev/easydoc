@@ -77,7 +77,7 @@ func serveMarkdownFiles(toc []string) {
 
 		result, err := markdown.MarkdownFileToHtml(file)
 		if err != nil {
-			result = markdown.MarkdownStringToHtml("### No file found at " + req.URL.String())
+			result = markdown.MarkdownStringToHtml("", "### No file found at "+req.URL.String())
 		}
 		io.WriteString(w, result)
 	}
@@ -105,6 +105,7 @@ func main() {
 	flag.Parse()
 	conf := config.Load(path.Join(*root, "easydoc.json"))
 	ignorerer := makeIgnorer(conf)
+	markdown.SetUrlBase(conf.ExternalUrlBase)
 
 	fmt.Println("Scanning files at ", *root)
 	files := walker.FindMarkdownFiles(ignorerer, *root)
