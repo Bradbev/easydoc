@@ -1,6 +1,7 @@
 package main
 
 import (
+	"easydoc/internal/config"
 	"easydoc/internal/markdown"
 	"easydoc/internal/walker"
 	"flag"
@@ -8,11 +9,17 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"text/template"
+
+	gitignore "github.com/sabhiram/go-gitignore"
 )
 
+var root = flag.String("root", ".", "Set this to the root path to serve")
+
+// A is a templating helper
 type A map[string]interface{}
 
 // T is a templating helper
@@ -35,10 +42,8 @@ func tocHtml(toc []string) string {
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="/static/github-markdown.css">
-<style>
-#toc { width: 33%; height:100%; float: left; margin-right: 1%; }
-#content{ width: 66%; height:100%; margin-top: 1px; border: none; outline: 1px solid black; }
-</style>
+<link rel="stylesheet" type="text/css" href="/static/easydoc.css">
+
 <script
   src="https://code.jquery.com/jquery-1.12.4.min.js"
   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
@@ -52,9 +57,9 @@ func tocHtml(toc []string) string {
 <div id="toc">
 	<ul>{{.li}}</ul>
 </div>
-<iframe id="content">
 
-</iframe>
+<iframe id="content"></iframe>
+
 </body>
 </html>`,
 		A{"li": liTags})
@@ -68,7 +73,7 @@ func serveMarkdownFiles(toc []string) {
 			return
 		}
 
-		file := path.Join("./", req.URL.String())
+		file := path.Join(*root, req.URL.String())
 
 		result, err := markdown.MarkdownFileToHtml(file)
 		if err != nil {
@@ -83,12 +88,25 @@ func serveMarkdownFiles(toc []string) {
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
 
+func makeIgnorer(conf *config.Config) (ignorer *gitignore.GitIgnore) {
+	ignoreFile := path.Join(*root, ".gitignore")
+	var err error
+	if _, err = os.Stat(ignoreFile); err == nil {
+		ignorer, err = gitignore.CompileIgnoreFileAndLines(ignoreFile, conf.Ignore...)
+	}
+	ignorer, err = gitignore.CompileIgnoreLines(conf.Ignore...)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ignorer
+}
+
 func main() {
 	flag.Parse()
-	rootPath := flag.Arg(0)
-	if rootPath == "" {
-		rootPath = "."
-	}
-	files := walker.FindMarkdownFiles(rootPath)
+	conf := config.Load(path.Join(*root, "easydoc.json"))
+	ignorerer := makeIgnorer(conf)
+
+	fmt.Println("Scanning files at ", *root)
+	files := walker.FindMarkdownFiles(ignorerer, *root)
 	serveMarkdownFiles(files)
 }

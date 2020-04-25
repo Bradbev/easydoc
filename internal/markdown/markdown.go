@@ -26,13 +26,18 @@ func MarkdownStringToHtml(input string) string {
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
 	parser := parser.NewWithExtensions(extensions)
 
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank | html.CompletePage
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
 	opts := html.RendererOptions{
 		Flags: htmlFlags,
-		CSS:   "/static/github-markdown.css",
 	}
 	renderer := html.NewRenderer(opts)
 
-	html := markdown.ToHTML([]byte(input), parser, renderer)
-	return string(html)
+	raw := markdown.ToHTML([]byte(input), parser, renderer)
+	html := `
+<html>
+	<link rel="stylesheet" type="text/css" href="/static/github-markdown.css">
+	<body class="markdown-body">` + string(raw) + `
+	</body>
+</html>`
+	return html
 }

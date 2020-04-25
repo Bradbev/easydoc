@@ -5,17 +5,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	gitignore "github.com/sabhiram/go-gitignore"
 )
 
-func FindMarkdownFiles(base string) []string {
+func FindMarkdownFiles(ignorer *gitignore.GitIgnore, base string) []string {
 	result := make([]string, 0)
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
+		if ignorer.MatchesPath(path) && info.IsDir() {
+			return filepath.SkipDir
+		}
+
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			panic("")
+			fmt.Printf("failured to access path %q: %v\n", path, err)
+			return nil
 		}
 		if strings.HasSuffix(strings.ToLower(path), ".md") {
-			result = append(result, path)
+			stripped := strings.TrimPrefix(path, base)
+			result = append(result, stripped)
 		}
 		return nil
 	})
