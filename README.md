@@ -1,21 +1,70 @@
-# Header
+# Easydoc
 
-It's very easy to make some words **bold** and other words _italic_ with Markdown.
-You can even [link to Google!](http://google.com)
+Easydoc is a very simple Markdown server. Configure Easydoc to serve a directory
+and it will find all `*.md` files under that directory structure. These files are
+shown in a left hand Table of Contents view.
+Markdown is rendered in the right hand panel when files are clicked from the TOC.
+The corpus of files can be searched with a simple regex.
 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
-As Kanye West said:
+## Purpose
 
-> We're living the future so
-> the present is our past.
+The main purpose of Easydoc is to support high level documentation in a source code
+repository. Simply organise your code as you normally would, and then place `*.md`
+files near to the code that they provide documentation for. Easydoc's own source follows
+this pattern.
 
-```go
-func getTrue() bool {
-    return true
-}
-```
+When documentation is placed near to code, it is easy to find when reading source code -
+just look in the current directory for MD files. Look upward to find more documentation.
+MD files near the leaf of the directory tree should be the most specific and detailed
+level for documentation. As you move up toward the root of the directory tree, documentation
+must become higher and higher level.
 
-| First Header                | Second Header                |
-| --------------------------- | ---------------------------- |
-| Content from cell 1         | Content from cell 2          |
-| Content in the first column | Content in the second column |
+One of the biggest criticisms of documentation is that it doesn't reflect what the code
+is meaning. This is a real problem. The best way to solve this problem is to write
+documentation from a very high level and describe **what** the code is doing. Avoid
+describing **how** it is done - this will allow the implementation to change without
+destroying all the documentation. Documenting the **how** is generally best done in
+the code itself with comments. In these cases, it's probably best to have a short
+description in the MD file referring to the code.
+This is of course (like all things) a balance. Some code will be best described in an MD
+file because it is easier to write as proper documentation instead of code comments.
+For example, protocols, or a complex allocator might fit better as real documentation.
+
+## URL structure
+
+Easydoc has a simple URL scheme
+
+- **root**/path/to/file.md will render `file.md` alone
+- **root**/#/path/to/file.md will render a Table Of Contents to the left, with `file.md` in the right
+  pane. Note the `#` at the start of the URL.
+- **root**/#/?search=<tosearch> will show a TOC on the left and search results on the right.
+
+The general principle of Easydoc's URLs is that they can be bookmarked and shared with others.
+
+This structure lets Markdown files link with other files in the tree using absolute paths -
+[example](/internal/InternalReadme.md). Take note that there is no # in this URL.
+
+## Flags
+
+Easydoc accepts some commandline flags. (cmd/easydoc/easydoc.go)
+
+| flag | usage                                                                                          |
+| ---- | ---------------------------------------------------------------------------------------------- |
+| root | The root path to begin serving from. `easydoc.json` will be used as configuration in this path |
+
+## easydoc.json
+
+Further configuration is stored in `easydoc.json`, which has the following known keys.
+
+| key             | usage                                                                                                                                                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ignore          | An array of strings. Each string follows the same format as .gitignore [rules](https://git-scm.com/docs/gitignore)                                              |
+| externalUrlBase | String. When present, each page will show a header with a link formed by prepending this value and the page location. This can be used to redirect to eg github |
+
+## .gitignore
+
+`.gitignore` will be loaded from **root** to restrict where files are indexed from
+
+## Help
+
+- [Markdown cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
