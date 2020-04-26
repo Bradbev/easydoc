@@ -3,9 +3,11 @@ package main
 import (
 	"easydoc/internal/config"
 	"easydoc/internal/markdown"
+	"easydoc/internal/search"
 	"easydoc/internal/walker"
 	"flag"
 	"fmt"
+	"html"
 	"io"
 	"log"
 	"net/http"
@@ -55,6 +57,7 @@ func tocHtml(toc []string) string {
 <body>
 
 <div id="toc">
+	<input id="searchBox" placeholder="Search">
 	<ul>{{.li}}</ul>
 </div>
 
@@ -65,9 +68,51 @@ func tocHtml(toc []string) string {
 		A{"li": liTags})
 }
 
-func serveMarkdownFiles(toc []string) {
+func searchHtml(results []search.FileResult) string {
+	hits := ""
+	for _, r := range results {
+		hits += `<h4><a class="searchlink" href="/` + r.File + `">` + r.File + `</a></h4><div class="results"><table>`
+		for _, h := range r.Hits {
+			hits += fmt.Sprintf("<tr><td>%d</td><td>%s</td></tr>", h.LineNumber, html.EscapeString(h.Line))
+		}
+		hits += "</table></div>"
+	}
+	return T(`<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/static/easydoc.css">
+
+<script
+  src="https://code.jquery.com/jquery-1.12.4.min.js"
+  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+  crossorigin="anonymous">
+</script>
+
+<script type="text/javascript" src="static/easydoc.js"></script>
+</head>
+
+<body>
+<div id="search">
+<h1>Search Results</h1>
+{{.hits}}
+</div>
+</body>
+</html>`,
+		A{"hits": hits})
+}
+
+const maxHitsPerPage = 5
+
+func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 	handler := func(w http.ResponseWriter, req *http.Request) {
-		// ugh, special case some of the paths
+		// special case some of the paths
+		if req.URL.Path == "/" {
+			values := req.URL.Query()
+			toSearch := values.Get("search")
+			if toSearch != "" {
+				io.WriteString(w, searchHtml(searcher.Search(toSearch, maxHitsPerPage)))
+				return
+			}
+		}
 		if req.URL.Path == "/" || strings.ToLower(req.URL.Path) == "/index.html" {
 			io.WriteString(w, tocHtml(toc))
 			return
@@ -107,7 +152,9 @@ func main() {
 	ignorerer := makeIgnorer(conf)
 	markdown.SetUrlBase(conf.ExternalUrlBase)
 
+	searcher := search.Searcher{}
 	fmt.Println("Scanning files at ", *root)
 	files := walker.FindMarkdownFiles(ignorerer, *root)
-	serveMarkdownFiles(files)
+	searcher.AddFiles(files)
+	serveMarkdownFiles(&searcher, files)
 }

@@ -3,6 +3,7 @@
 It's very easy to make some words **bold** and other words _italic_ with Markdown.
 You can even [link to Google!](http://google.com)
 
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 As Kanye West said:
 
 > We're living the future so
