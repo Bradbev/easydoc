@@ -48,9 +48,11 @@ This structure lets Markdown files link with other files in the tree using absol
 
 Easydoc accepts some commandline flags. (cmd/easydoc/easydoc.go)
 
-| flag | usage                                                                                          |
-| ---- | ---------------------------------------------------------------------------------------------- |
-| root | The root path to begin serving from. `easydoc.json` will be used as configuration in this path |
+| flag    | usage                                                                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| root    | The root path to begin serving from. `easydoc.json` will be used as configuration in this path                                                                            |
+| rootUrl | The root of the full path that Easydoc is served from. Default is `http://localhost:8080`. If you are behind a proxy, you might need something like `https://mysite/docs` |
+| port    | The interface and port to bind on. Defaults to `localhost:8080`                                                                                                           |
 
 ## easydoc.json
 
