@@ -16,10 +16,15 @@ import (
 	"strings"
 	"text/template"
 
-	gitignore "github.com/sabhiram/go-gitignore"
+	ignore "github.com/sabhiram/go-gitignore"
 )
 
 var root = flag.String("root", ".", "Set this to the root path to serve")
+var port = flag.String("port", "localhost:8080", "Host and port to serve on")
+var rootUrlFlag = flag.String("rootUrl", "http://localhost:8080", "This string will be prepended to make links fully qualified")
+
+// rootUrl will take a copy of rootUrlFlag.  Exists only to remove the pointer deref noise
+var rootUrl string
 
 // A is a templating helper
 type A map[string]interface{}
@@ -38,13 +43,13 @@ func T(input string, args A) string {
 func tocHtml(toc []string) string {
 	liTags := ""
 	for _, file := range toc {
-		liTags += T(`<li><a href="{{.file}}">{{.file}}</a></li>`, A{"file": file})
+		liTags += T(`<li><a href onclick="tocClick('{{.base}}/#{{.file}}', '{{.base}}/{{.file}}')">{{.file}}</a></li>`, A{"file": file, "base": rootUrl})
 	}
 	return T(`
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="/static/github-markdown.css">
-<link rel="stylesheet" type="text/css" href="/static/easydoc.css">
+<link rel="stylesheet" type="text/css" href="{{.base}}/static/github-markdown.css">
+<link rel="stylesheet" type="text/css" href="{{.base}}/static/easydoc.css">
 
 <script
   src="https://code.jquery.com/jquery-1.12.4.min.js"
@@ -52,7 +57,12 @@ func tocHtml(toc []string) string {
   crossorigin="anonymous">
 </script>
 
-<script type="text/javascript" src="static/easydoc.js"></script>
+<script>
+function getBase() { return "{{.base}}" }
+</script>
+
+<script type="text/javascript" src="{{.base}}/static/easydoc.js"></script>
+
 </head>
 <body>
 
@@ -65,13 +75,19 @@ func tocHtml(toc []string) string {
 
 </body>
 </html>`,
-		A{"li": liTags})
+		A{
+			"li":   liTags,
+			"base": rootUrl,
+		})
 }
 
 func searchHtml(results []search.FileResult) string {
 	hits := ""
 	for _, r := range results {
-		hits += `<h4><a class="searchlink" href="/` + r.File + `">` + r.File + `</a></h4><div class="results"><table>`
+		hits += T(`<h4><a class="searchlink" href="{{.base}}/{{.file}}">{{.file}}</a></h4><div class="results"><table>`, A{
+			"file": r.File,
+			"base": rootUrl,
+		})
 		for _, h := range r.Hits {
 			hits += fmt.Sprintf("<tr><td>%d</td><td>%s</td></tr>", h.LineNumber, html.EscapeString(h.Line))
 		}
@@ -79,7 +95,7 @@ func searchHtml(results []search.FileResult) string {
 	}
 	return T(`<html>
 <head>
-<link rel="stylesheet" type="text/css" href="/static/easydoc.css">
+<link rel="stylesheet" type="text/css" href="{{.base}}/static/easydoc.css">
 
 <script
   src="https://code.jquery.com/jquery-1.12.4.min.js"
@@ -87,7 +103,7 @@ func searchHtml(results []search.FileResult) string {
   crossorigin="anonymous">
 </script>
 
-<script type="text/javascript" src="static/easydoc.js"></script>
+<script type="text/javascript" src="{{.base}}/static/easydoc.js"></script>
 </head>
 
 <body>
@@ -97,7 +113,10 @@ func searchHtml(results []search.FileResult) string {
 </div>
 </body>
 </html>`,
-		A{"hits": hits})
+		A{
+			"hits": hits,
+			"base": rootUrl,
+		})
 }
 
 const maxHitsPerPage = 5
@@ -129,17 +148,17 @@ func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.HandleFunc("/", handler)
-	fmt.Println("Serving on :8080")
-	log.Fatal(http.ListenAndServe("localhost:8080", nil))
+	fmt.Println("Serving on ", *port)
+	log.Fatal(http.ListenAndServe(*port, nil))
 }
 
-func makeIgnorer(conf *config.Config) (ignorer *gitignore.GitIgnore) {
+func makeIgnorer(conf *config.Config) (ignorer *ignore.GitIgnore) {
 	ignoreFile := path.Join(*root, ".gitignore")
 	var err error
 	if _, err = os.Stat(ignoreFile); err == nil {
-		ignorer, err = gitignore.CompileIgnoreFileAndLines(ignoreFile, conf.Ignore...)
+		ignorer, err = ignore.CompileIgnoreFileAndLines(ignoreFile, conf.Ignore...)
 	}
-	ignorer, err = gitignore.CompileIgnoreLines(conf.Ignore...)
+	ignorer, err = ignore.CompileIgnoreLines(conf.Ignore...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,6 +167,7 @@ func makeIgnorer(conf *config.Config) (ignorer *gitignore.GitIgnore) {
 
 func main() {
 	flag.Parse()
+	rootUrl = *rootUrlFlag
 	conf := config.Load(path.Join(*root, "easydoc.json"))
 	ignorerer := makeIgnorer(conf)
 	markdown.SetUrlBase(conf.ExternalUrlBase)

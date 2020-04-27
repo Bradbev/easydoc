@@ -1,10 +1,15 @@
+function tocClick(topUrl, contentUrl) {
+    var $content = $('#content');
+    $content.attr('src', contentUrl)
+    window.location.replace(topUrl)
+    return false
+}
+
 $(function() {
     // href clicking in the TOC
     var $content = $('#content');
     $('#toc a')
-        .click(function() {
-            $content.attr('src', $(this).attr('href'));
-            window.location.hash = $(this).attr('href');
+        .click(function(topUrl, contentUrl) {
             return false;
         });
 
@@ -15,7 +20,7 @@ $(function() {
         if (event.keyCode === 13) {
             // Cancel the default action, if needed
             event.preventDefault();
-            window.location.replace('/#/?search=' + box.val())
+            window.location.replace(getBase() + '/#/?search=' + box.val())
             window.location.reload()
         }
     });

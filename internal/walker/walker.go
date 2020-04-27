@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	gitignore "github.com/sabhiram/go-gitignore"
+	ignore "github.com/sabhiram/go-gitignore"
 )
 
-func FindMarkdownFiles(ignorer *gitignore.GitIgnore, base string) []string {
+func FindMarkdownFiles(ignorer *ignore.GitIgnore, base string) []string {
 	result := make([]string, 0)
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
 		if ignorer.MatchesPath(path) && info.IsDir() {
