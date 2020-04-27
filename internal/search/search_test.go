@@ -16,11 +16,11 @@ func TestSearch(t *testing.T) {
 		},
 	}
 
-	a := s.Search("a")
+	a := s.Search("a", 0)
 	assert.Len(t, a, 1)
 	assert.Equal(t, "a", a[0].File)
 	assert.Len(t, a[0].Hits, 2)
 
-	ab := s.Search("b|a")
+	ab := s.Search("b|a", 0)
 	assert.Len(t, ab, 2)
 }

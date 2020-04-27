@@ -6,6 +6,9 @@ shown in a left hand Table of Contents view.
 Markdown is rendered in the right hand panel when files are clicked from the TOC.
 The corpus of files can be searched with a simple regex.
 
+> NOTE: Easydoc will only reindex the root directory upon startup. It currently does
+> no file watching.
+
 ## Purpose
 
 The main purpose of Easydoc is to support high level documentation in a source code
@@ -65,8 +68,17 @@ Further configuration is stored in `easydoc.json`, which has the following known
 
 ## .gitignore
 
-`.gitignore` will be loaded from **root** to restrict where files are indexed from
+`.gitignore` will be loaded from **root** to restrict where files are indexed from.
 
-## Help
+## Easydoc code structure
+
+Easydoc was written against Go 1.14 and follows the [Go Standard Project](https://github.com/golang-standards/project-layout)
+layout.
+
+- /cmd/easydoc - the main Easydoc file
+- /internal - internal packages that Easydoc uses
+- /static - these files are served at runtime
+
+## Markdown help
 
 - [Markdown cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
