@@ -124,6 +124,7 @@ const maxHitsPerPage = 5
 func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 	handler := func(w http.ResponseWriter, req *http.Request) {
 		// special case some of the paths
+		fmt.Println("Handle", req.URL.Path)
 		if req.URL.Path == "/" {
 			values := req.URL.Query()
 			toSearch := values.Get("search")
@@ -141,7 +142,7 @@ func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 
 		result, err := markdown.MarkdownFileToHtml(file)
 		if err != nil {
-			result = markdown.MarkdownStringToHtml("", "### No file found at "+req.URL.String())
+			result = "No file found at " + req.URL.String()
 		}
 		io.WriteString(w, result)
 	}
@@ -154,11 +155,15 @@ func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 
 func makeIgnorer(conf *config.Config) (ignorer *ignore.GitIgnore) {
 	ignoreFile := path.Join(*root, ".gitignore")
+	fmt.Println(".gitignore at ", ignoreFile)
 	var err error
+	toIgnore := append(conf.Ignore, ".git")
 	if _, err = os.Stat(ignoreFile); err == nil {
-		ignorer, err = ignore.CompileIgnoreFileAndLines(ignoreFile, conf.Ignore...)
+		fmt.Println("Found .gitignore")
+		ignorer, err = ignore.CompileIgnoreFileAndLines(ignoreFile, toIgnore...)
+	} else {
+		ignorer, err = ignore.CompileIgnoreLines(toIgnore...)
 	}
-	ignorer, err = ignore.CompileIgnoreLines(conf.Ignore...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -170,7 +175,7 @@ func main() {
 	rootUrl = *rootUrlFlag
 	conf := config.Load(path.Join(*root, "easydoc.json"))
 	ignorerer := makeIgnorer(conf)
-	markdown.SetUrlBase(conf.ExternalUrlBase)
+	markdown.SetUrlBase(*root, conf.ExternalUrlBase)
 
 	searcher := search.Searcher{}
 	fmt.Println("Scanning files at ", *root)

@@ -7,5 +7,6 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/stretchr/testify v1.5.1
+	github.com/yuin/goldmark v1.1.30
 	gopkg.in/russross/blackfriday.v2 v2.0.0
 )

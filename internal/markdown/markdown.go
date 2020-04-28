@@ -1,44 +1,34 @@
 package markdown
 
 import (
+	"bytes"
 	"io/ioutil"
+	"strings"
 
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
 var urlBase string
+var rootPath string
 
-func SetUrlBase(base string) {
+func SetUrlBase(rootPathArg, base string) {
 	urlBase = base
+	rootPath = rootPathArg
 }
 
 func MarkdownFileToHtml(filename string) (string, error) {
-	md, err := ioutil.ReadFile(filename)
+	filedata, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}
-	return MarkdownStringToHtml(filename, string(md)), nil
-}
 
-func MarkdownStringToHtml2(input string) string {
-	html := blackfriday.Run([]byte(input), blackfriday.WithExtensions(blackfriday.CommonExtensions))
-	return string(html)
-}
-
-func MarkdownStringToHtml(filename, input string) string {
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-	parser := parser.NewWithExtensions(extensions)
-
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
-	opts := html.RendererOptions{
-		Flags: htmlFlags,
+	gold := goldmark.New(goldmark.WithExtensions(extension.GFM))
+	var buf bytes.Buffer
+	if err = gold.Convert(filedata, &buf); err != nil {
+    	return "", err
 	}
-	renderer := html.NewRenderer(opts)
 
-	raw := markdown.ToHTML([]byte(input), parser, renderer)
 	html := `
 	<html> 
 	<link rel="stylesheet" type="text/css" href="/static/github-markdown.css">
@@ -46,8 +36,11 @@ func MarkdownStringToHtml(filename, input string) string {
 	<body>
 	`
 	if urlBase != "" {
+		if strings.HasPrefix(filename, rootPath) {
+			filename = filename[len(rootPath):]
+		}
 		html += `<div class="header">View file externally at <a target="_blank" href="` + urlBase + filename + `">` + filename + `</a><HR></div>`
 	}
-	html += `<div class="markdown-body">` + string(raw) + `</div></body> </html>`
-	return html
+	html += `<div class="markdown-body">` + buf.String() + `</div></body> </html>`
+	return html, nil
 }

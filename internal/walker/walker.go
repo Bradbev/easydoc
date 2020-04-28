@@ -5,14 +5,20 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	ignore "github.com/sabhiram/go-gitignore"
 )
 
 func FindMarkdownFiles(ignorer *ignore.GitIgnore, base string) []string {
 	result := make([]string, 0)
+	startTime := time.Now()
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
-		if ignorer.MatchesPath(path) && info.IsDir() {
+		path = strings.ReplaceAll(path, "\\", "/")
+		relativePath := strings.TrimPrefix(path, base)
+		// fmt.Println(relativePath)
+		if ignorer.MatchesPath(relativePath) && info.IsDir() {
+			fmt.Println("Skipping dir:", relativePath)
 			return filepath.SkipDir
 		}
 
@@ -30,6 +36,7 @@ func FindMarkdownFiles(ignorer *ignore.GitIgnore, base string) []string {
 		fmt.Printf("error walking the path %q: %v\n", base, err)
 		panic("")
 	}
+	fmt.Println("Scan took ", time.Now().Sub(startTime))
 
 	return result
 }
