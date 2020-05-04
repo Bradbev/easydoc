@@ -1,16 +1,20 @@
 package search
 
 import (
+	"fmt"
 	"io/ioutil"
+	"path"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
 
 type Searcher struct {
-	files   []string
-	content map[string][]string
-	sorted  bool
+	RootPath string
+	files    []string
+	content  map[string][]string
+	sorted   bool
 }
 
 func (s *Searcher) AddFile(file string) {
@@ -31,6 +35,13 @@ func (s *Searcher) Search(regex string, maxResults int) []FileResult {
 	return s.getResults(regex, maxResults)
 }
 
+func (s *Searcher) LoadCache() {
+	start := time.Now()
+	fmt.Println("Loading Search cache")
+	s.getResults("This string doesn't matter", 0)
+	fmt.Println("Cache loaded in ", time.Now().Sub(start))
+}
+
 func (s *Searcher) getResults(regex string, maxResults int) []FileResult {
 	if s.content == nil {
 		s.content = make(map[string][]string)
@@ -40,7 +51,11 @@ func (s *Searcher) getResults(regex string, maxResults int) []FileResult {
 	for _, file := range s.files {
 		lines, ok := s.content[file]
 		if !ok {
-			content, _ := ioutil.ReadFile(file)
+			fullPath := path.Join(s.RootPath, file)
+			content, err := ioutil.ReadFile(fullPath)
+			if err != nil {
+				fmt.Println("Error loading ", s.RootPath, fullPath, err)
+			}
 			if content != nil {
 				lines = strings.Split(string(content), "\n")
 				s.content[file] = lines

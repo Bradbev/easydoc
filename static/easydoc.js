@@ -78,7 +78,7 @@ $(function() {
         console.log(window.location.hash)
         if (window.location.hash != "") {
             noHash = window.location.hash.substring(1)
-            $content.attr('src', noHash)
+            $content.attr('src', getBase() + noHash)
         }
     });
 

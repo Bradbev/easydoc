@@ -199,11 +199,13 @@ func main() {
 	rootUrl = *rootUrlFlag
 	conf := config.Load(path.Join(*root, "easydoc.json"))
 	ignorerer := makeIgnorer(conf)
-	markdown.SetUrlBase(*root, conf.ExternalUrlBase)
+	markdown.SetUrlBase(*root, rootUrl, conf.ExternalUrlBase)
 
-	searcher := search.Searcher{}
+	searcher := search.Searcher{RootPath: *root}
+
 	fmt.Println("Scanning files at ", *root)
 	files := walker.FindMarkdownFiles(ignorerer, *root)
 	searcher.AddFiles(files)
+	searcher.LoadCache()
 	serveMarkdownFiles(&searcher, files)
 }
