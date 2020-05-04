@@ -46,15 +46,21 @@ func tocHtml(toc []string) string {
 		liTags += T(`<li><a href onclick="tocClick('{{.base}}/#{{.file}}', '{{.base}}/{{.file}}')">{{.file}}</a></li>`, A{"file": file, "base": rootUrl})
 	}
 	return T(`
-<html>
+<!DOCTYPE html>
+<html style="overflow: hidden;">
+
 <head>
+<title>Easydoc</title>
 <link rel="stylesheet" type="text/css" href="{{.base}}/static/github-markdown.css">
 <link rel="stylesheet" type="text/css" href="{{.base}}/static/easydoc.css">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 
 <script
-  src="https://code.jquery.com/jquery-1.12.4.min.js"
-  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-  crossorigin="anonymous">
+	src="https://code.jquery.com/jquery-1.12.4.min.js"
+	integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+	crossorigin="anonymous">
 </script>
 
 <script>
@@ -62,16 +68,34 @@ function getBase() { return "{{.base}}" }
 </script>
 
 <script type="text/javascript" src="{{.base}}/static/easydoc.js"></script>
-
 </head>
-<body>
 
-<div id="toc">
-	<input id="searchBox" placeholder="Search">
-	<ul>{{.li}}</ul>
-</div>
+<body style="overflow: hidden;">
+<header>
+	<span id="application-title">Easydoc</span>
+	<div id="search-field-container" role="search">
+		<input id="search-field" type="search" placeholder="🔎 Search" required>
+		<button id="search-field-button" type="button">🔎</button>
+	</div>
+</header>
 
-<iframe id="content"></iframe>
+<main>
+	<nav id="toc">
+		<ul>{{.li}}</ul>
+		<div id="toc-drawer-handle">
+			<button id="toc-drawer-toggle">
+				<span class="icon-open">▶</span>
+				<span class="icon-close">◀</span>
+				<span class="icon-drawer-handle"></span>
+				<span class="icon-close">◀</span>
+				<span class="icon-open">▶</span>
+			</button>
+			<div id="toc-drawer-dragbar"></div>
+		</div>
+	</nav>
+
+	<iframe id="content"></iframe>
+</main>
 
 </body>
 </html>`,
@@ -98,9 +122,9 @@ func searchHtml(results []search.FileResult) string {
 <link rel="stylesheet" type="text/css" href="{{.base}}/static/easydoc.css">
 
 <script
-  src="https://code.jquery.com/jquery-1.12.4.min.js"
-  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-  crossorigin="anonymous">
+	src="https://code.jquery.com/jquery-1.12.4.min.js"
+	integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+	crossorigin="anonymous">
 </script>
 
 <script type="text/javascript" src="{{.base}}/static/easydoc.js"></script>
