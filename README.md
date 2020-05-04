@@ -6,6 +6,9 @@ shown in a left hand Table of Contents view.
 Markdown is rendered in the right hand panel when files are clicked from the TOC.
 The corpus of files can be searched with a simple regex.
 
+[Goldmark](https://github.com/yuin/goldmark) is a fantastic Markdown renderer that
+Easydoc uses - thanks very much Yusuke Inuzuka.
+
 > NOTE: Easydoc will only reindex the root directory upon startup. It currently does
 > no file watching.
 
