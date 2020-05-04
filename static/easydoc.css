@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -34,7 +35,7 @@ main {
     font-size: 1.5rem;
     font-weight: bold;
     margin-right: 2rem;
-    color: rgba(255,255,255, 0.9);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 #search-field-container {
@@ -47,6 +48,7 @@ main {
 }
 
 #search-field {
+    -webkit-appearance: none;
     width: 100%;
     align-self: stretch;
     margin: 0.5rem 0 0.5rem auto;
@@ -57,14 +59,16 @@ main {
 
 #search-field-button {
     position: absolute;
-    top: 0.5rem; bottom: 0.5rem; left: 0rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 0rem;
 }
 
 #search-field-button.animate {
     transition: transform 150ms ease;
 }
 
-#search-field:valid + #search-field-button {
+#search-field:valid+#search-field-button {
     transform: translateX(-100%);
 }
 
@@ -85,21 +89,27 @@ main {
     width: 35%;
     transition: width 150ms;
 }
+
 #toc.push.closed {
-    width: 1rem !important; /* We need to override the draggable size for push style */
+    width: 1rem !important;
+    /* We need to override the draggable size for push style */
 }
 
 #toc.float {
     z-index: 2;
     position: absolute;
-    top: 0; bottom: 0; left: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
     transform: translateX(calc(-100% + 1rem));
     transition: transform 150ms;
 }
+
 #toc.float.open {
     transform: translateX(0);
 }
+
 #toc.float #toc-drawer-dragbar {
     display: none;
 }
@@ -107,6 +117,7 @@ main {
 #toc.open #toc-drawer-toggle .icon-close {
     display: block;
 }
+
 #toc.open #toc-drawer-toggle .icon-open {
     display: none;
 }
@@ -127,6 +138,7 @@ main {
 #toc ul li {
     border-top: 1px solid #777;
 }
+
 #toc ul li:first-child {
     border-top: none;
 }
@@ -144,7 +156,8 @@ main {
 }
 
 #toc-drawer-toggle {
-    height: auto; width: 100%;
+    height: auto;
+    width: 100%;
     background-color: transparent;
     border: none;
     padding: 0;
@@ -166,7 +179,9 @@ main {
 #toc-drawer-dragbar {
     position: absolute;
     z-index: 3;
-    top: 0; left: 100%; bottom: 0;
+    top: 0;
+    left: 100%;
+    bottom: 0;
     width: 4px;
     cursor: ew-resize;
     user-select: none;
@@ -178,9 +193,11 @@ main {
     margin-left: 1rem;
 }
 
-#search, .markdown-body {
+#search,
+.markdown-body {
     padding: 1rem;
-    max-width: 60rem; /* Readability column size */
+    max-width: 60rem;
+    /* Readability column size */
     margin: 0 auto;
 }
 
@@ -206,7 +223,8 @@ iframe {
         Note these elements are in iframes so their width is based
         on the iframe size not the window size
     */
-    #search, .markdown-body {
+    #search,
+    .markdown-body {
         padding: 1rem 2rem;
     }
 }
