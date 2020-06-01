@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,6 +12,10 @@ import (
 )
 
 func FindMarkdownFiles(ignorer *ignore.GitIgnore, base string) []string {
+	return FindFiles(ignorer, base, `.*\.md$`)
+}
+func FindFiles(ignorer *ignore.GitIgnore, base string, regex string) []string {
+	matcher := regexp.MustCompile(regex)
 	result := make([]string, 0)
 	startTime := time.Now()
 	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
@@ -26,7 +31,7 @@ func FindMarkdownFiles(ignorer *ignore.GitIgnore, base string) []string {
 			fmt.Printf("failured to access path %q: %v\n", path, err)
 			return nil
 		}
-		if strings.HasSuffix(strings.ToLower(path), ".md") {
+		if matcher.MatchString(strings.ToLower(path)) {
 			stripped := strings.TrimPrefix(path, base)
 			result = append(result, stripped)
 		}

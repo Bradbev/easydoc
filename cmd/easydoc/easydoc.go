@@ -22,6 +22,7 @@ import (
 var root = flag.String("root", ".", "Set this to the root path to serve")
 var port = flag.String("port", "localhost:8080", "Host and port to serve on")
 var rootUrlFlag = flag.String("rootUrl", "http://localhost:8080", "This string will be prepended to make links fully qualified")
+var includeFeatures = flag.Bool("includeFeatures", false, "When true, include .feature files")
 
 // rootUrl will take a copy of rootUrlFlag.  Exists only to remove the pointer deref noise
 var rootUrl string
@@ -164,6 +165,12 @@ func serveMarkdownFiles(searcher *search.Searcher, toc []string) {
 
 		file := path.Join(*root, req.URL.String())
 
+		if strings.ToLower(path.Ext(file)) != ".md" {
+			fmt.Println("Serve file", file)
+			http.ServeFile(w, req, file)
+			return
+		}
+
 		result, err := markdown.MarkdownFileToHtml(file)
 		if err != nil {
 			result = "No file found at " + req.URL.String()
@@ -204,7 +211,14 @@ func main() {
 	searcher := search.Searcher{RootPath: *root}
 
 	fmt.Println("Scanning files at ", *root)
-	files := walker.FindMarkdownFiles(ignorerer, *root)
+
+	var files []string
+	if *includeFeatures {
+		files = walker.FindFiles(ignorerer, *root, `^.*\.(feature|md)$`)
+	} else {
+		files = walker.FindMarkdownFiles(ignorerer, *root)
+	}
+
 	searcher.AddFiles(files)
 	searcher.LoadCache()
 	serveMarkdownFiles(&searcher, files)

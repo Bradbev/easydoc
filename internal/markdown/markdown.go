@@ -28,6 +28,9 @@ func MarkdownFileToHtml(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if strings.HasPrefix(filename, hostFileBase) {
+		filename = filename[len(hostFileBase):]
+	}
 	filedata = fixInternalLinks(hostUrlBase, filename, filedata)
 
 	gold := goldmark.New(goldmark.WithExtensions(extension.GFM, highlighting.Highlighting))
@@ -43,9 +46,6 @@ func MarkdownFileToHtml(filename string) (string, error) {
 	<body>
 	`
 	if externalUrl != "" {
-		if strings.HasPrefix(filename, hostFileBase) {
-			filename = filename[len(hostFileBase):]
-		}
 		html += `<div class="header">View file externally at <a target="_blank" href="` + externalUrl + filename + `">` + filename + `</a><HR></div>`
 	}
 	html += `<div class="markdown-body">` + buf.String() + `</div></body> </html>`

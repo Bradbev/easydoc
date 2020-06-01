@@ -1,6 +1,6 @@
 html,
 body {
-    height: 100%;
+    height: 100vh;
 }
 
 body {
@@ -24,6 +24,7 @@ header {
 }
 
 main {
+    height: 0;
     display: flex;
     flex-flow: nowrap row;
     align-items: stretch;
@@ -150,6 +151,15 @@ main {
     padding: 0.15rem 0.5rem;
 }
 
+#toc a:focus {
+    background-color: #d3d3d3
+}
+
+#toc a {
+    color: black;
+    text-decoration: none;
+}
+
 #toc-drawer-handle {
     display: flex;
     flex-flow: nowrap row;
@@ -195,6 +205,10 @@ main {
     margin-left: 1rem;
 }
 
+.markdown-body {
+    margin: 0 auto 0 0;
+}
+
 #search,
 .markdown-body {
     padding: 1rem;
@@ -204,6 +218,7 @@ main {
 }
 
 .header {
+    flex: 0 0 auto;
     font-size: x-small;
 }
 

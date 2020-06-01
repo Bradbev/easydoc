@@ -2,6 +2,7 @@
 
 [Up](../readme.md)
 
+
 ## /internal/markdown
 
 Helper functions that wrap around the `blackfriday` package.
