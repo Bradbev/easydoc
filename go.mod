@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
+	github.com/facebookgo/symwalk v0.0.0-20150726040526-42004b9f3222
 	github.com/gomarkdown/markdown v0.0.0-20200127000047-1813ea067497
 	github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect

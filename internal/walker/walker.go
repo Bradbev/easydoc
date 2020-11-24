@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facebookgo/symwalk"
 	ignore "github.com/sabhiram/go-gitignore"
 )
 
@@ -18,7 +19,7 @@ func FindFiles(ignorer *ignore.GitIgnore, base string, regex string) []string {
 	matcher := regexp.MustCompile(regex)
 	result := make([]string, 0)
 	startTime := time.Now()
-	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
+	err := symwalk.Walk(base, func(path string, info os.FileInfo, err error) error {
 		path = strings.ReplaceAll(path, "\\", "/")
 		relativePath := strings.TrimPrefix(path, base)
 		// fmt.Println(relativePath)
@@ -28,7 +29,7 @@ func FindFiles(ignorer *ignore.GitIgnore, base string, regex string) []string {
 		}
 
 		if err != nil {
-			fmt.Printf("failured to access path %q: %v\n", path, err)
+			fmt.Printf("failed to access path %q: %v\n", path, err)
 			return nil
 		}
 		if matcher.MatchString(strings.ToLower(path)) {
