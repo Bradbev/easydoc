@@ -40,7 +40,6 @@ func FindFiles(ignorer *ignore.GitIgnore, base string, regex string) []string {
 	})
 	if err != nil {
 		fmt.Printf("error walking the path %q: %v\n", base, err)
-		panic("")
 	}
 	fmt.Println("Scan took ", time.Now().Sub(startTime))
 
