@@ -11,6 +11,7 @@ import (
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 var externalUrl string
@@ -33,7 +34,7 @@ func MarkdownFileToHtml(filename string) (string, error) {
 	}
 	filedata = fixInternalLinks(hostUrlBase, filename, filedata)
 
-	gold := goldmark.New(goldmark.WithExtensions(extension.GFM, highlighting.Highlighting))
+	gold := goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()), goldmark.WithExtensions(extension.GFM, highlighting.Highlighting))
 	var buf bytes.Buffer
 	if err = gold.Convert(filedata, &buf); err != nil {
 		return "", err
